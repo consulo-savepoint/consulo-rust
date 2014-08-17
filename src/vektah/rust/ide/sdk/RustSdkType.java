@@ -1,92 +1,79 @@
 package vektah.rust.ide.sdk;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.projectRoots.*;
-import com.intellij.openapi.roots.OrderRootType;
-import com.intellij.openapi.util.SystemInfo;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.xmlb.XmlSerializer;
-import org.jdom.Element;
+import java.io.File;
+
+import javax.swing.Icon;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.intellij.openapi.projectRoots.SdkType;
+import com.intellij.openapi.roots.OrderRootType;
+import com.intellij.openapi.roots.types.BinariesOrderRootType;
+import com.intellij.openapi.util.SystemInfo;
 import vektah.rust.RustIcons;
 import vektah.rust.i18n.RustBundle;
 
-import javax.swing.*;
+public class RustSdkType extends SdkType
+{
+	@NotNull
+	public static String getRustc(String path)
+	{
+		return path + "/bin/rustc" + (SystemInfo.isWindows ? ".exe" : "");
+	}
 
-public class RustSdkType extends SdkType {
-	private RustSdkData sdkData;
+	@NotNull
+	public static RustSdkType getInstance()
+	{
+		return EP_NAME.findExtension(RustSdkType.class);
+	}
 
-	public RustSdkType() {
+	public RustSdkType()
+	{
 		super(RustBundle.message("sdk.name.rust"));
 	}
 
-	public static RustSdkType getInstance() {
-		return SdkType.findInstance(RustSdkType.class);
+	@Nullable
+	@Override
+	public String suggestHomePath()
+	{
+		return null;
 	}
 
 	@Nullable
 	@Override
-	public String suggestHomePath() {
-		if (SystemInfo.isMac || SystemInfo.isLinux) {
-			return "/usr/local/bin";
-		}
-		return null;
+	public String getVersionString(String s)
+	{
+		return RustSdkUtil.getVersion(new File(getRustc(s)));
 	}
 
 	@Override
-	public boolean isValidSdkHome(String path) {
-		sdkData = RustSdkUtil.testRustSdk(path);
-		return sdkData != null;
+	public boolean isValidSdkHome(String path)
+	{
+		return getVersionString(path) != null;
 	}
 
 	@Override
-	public void setupSdkPaths(@NotNull Sdk sdk) {
-	}
-
-	@Override
-	public String suggestSdkName(String currentSdkName, String sdkHome) {
-		if (sdkData != null) {
-			return sdkData.getSdkName();
-		}
+	public String suggestSdkName(String currentSdkName, String sdkHome)
+	{
 		return getPresentableName();
 	}
 
-	@Nullable
+	@NotNull
 	@Override
-	public AdditionalDataConfigurable createAdditionalDataConfigurable(SdkModel sdkModel, SdkModificator sdkModificator) {
-		return null;
-	}
-
-	@Override
-	public String getPresentableName() {
+	public String getPresentableName()
+	{
 		return RustBundle.message("sdk.name.rust");
 	}
 
 	@Override
-	public SdkAdditionalData loadAdditionalData(Element additional) {
-		return XmlSerializer.deserialize(additional, RustSdkData.class);
+	public Icon getIcon()
+	{
+		return RustIcons.Rust;
 	}
 
 	@Override
-	public void saveAdditionalData(@NotNull SdkAdditionalData additionalData, @NotNull Element additional) {
-		if (additionalData instanceof RustSdkData) {
-			XmlSerializer.serializeInto(additionalData, additional);
-		}
-	}
-
-	@Override
-	public Icon getIcon() {
-		return RustIcons.ICON_RUST_16;
-	}
-
-	@Override
-	public Icon getIconForAddAction() {
-		return getIcon();
-	}
-
-	@Override
-	public boolean isRootTypeApplicable(OrderRootType type) {
-		return type == OrderRootType.CLASSES || type == OrderRootType.SOURCES;
+	public boolean isRootTypeApplicable(OrderRootType type)
+	{
+		return type == BinariesOrderRootType.getInstance();
 	}
 }

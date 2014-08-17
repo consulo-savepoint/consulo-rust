@@ -1,24 +1,22 @@
 package vektah.rust.ide;
 
-import com.intellij.application.options.colors.InspectionColorSettingsPage;
+import java.util.Collections;
+import java.util.Map;
+
+import javax.swing.Icon;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
-import com.intellij.psi.codeStyle.DisplayPriority;
-import com.intellij.psi.codeStyle.DisplayPrioritySortable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import vektah.rust.RustIcons;
 import vektah.rust.RustSyntaxHighlighter;
 import vektah.rust.i18n.RustBundle;
 
-import javax.swing.*;
-import java.util.Collections;
-import java.util.Map;
-
-public class RustColorSettingsPage implements ColorSettingsPage, InspectionColorSettingsPage, DisplayPrioritySortable {
+public class RustColorSettingsPage implements ColorSettingsPage {
 	private static final AttributesDescriptor[] descriptors = new AttributesDescriptor[] {
 			new AttributesDescriptor(RustBundle.message("options.rust.attribute.descriptor.keyword"), RustSyntaxHighlighter.KEYWORD),
 			new AttributesDescriptor(RustBundle.message("options.rust.attribute.descriptor.identifier"), RustSyntaxHighlighter.IDENTIFIER),
@@ -41,7 +39,7 @@ public class RustColorSettingsPage implements ColorSettingsPage, InspectionColor
 	@Nullable
 	@Override
 	public Icon getIcon() {
-		return RustIcons.ICON_RUST_16;
+		return RustIcons.Rust;
 	}
 
 	@NotNull
@@ -90,11 +88,4 @@ public class RustColorSettingsPage implements ColorSettingsPage, InspectionColor
 	public String getDisplayName() {
 		return RustBundle.message("language.name.rust");
 	}
-
-	@Override
-	public DisplayPriority getPriority() {
-		return DisplayPriority.KEY_LANGUAGE_SETTINGS;
-	}
-
-
 }

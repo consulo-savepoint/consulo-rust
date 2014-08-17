@@ -1,109 +1,61 @@
 package vektah.rust.ide.runner;
 
-import com.intellij.execution.configurations.ConfigurationUtil;
-import com.intellij.execution.ui.ConfigurationModuleSelector;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+
+import org.jetbrains.annotations.NotNull;
+import com.intellij.application.options.ModuleListCellRenderer;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SettingsEditor;
-import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.LabeledComponent;
-import com.intellij.psi.JavaCodeFragment;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.util.PsiMethodUtil;
-import com.intellij.ui.EditorTextFieldWithBrowseButton;
-import com.intellij.ui.PanelWithAnchor;
-import com.intellij.util.ui.UIUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.intellij.openapi.ui.VerticalFlowLayout;
 import vektah.rust.ide.ui.RustParametersPanel;
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+public class RustRunSettingsEditor extends SettingsEditor<RustConfiguration>
+{
+	private JPanel myRootPanel;
 
-public class RustRunSettingsEditor extends SettingsEditor<RustConfiguration> implements PanelWithAnchor {
-	private final Project project;
+	private RustParametersPanel myRustParametersPanel;
+	private ComboBox myModuleBox;
 
-	private RustParametersPanel rustParametersPanel;
-	private LabeledComponent<EditorTextFieldWithBrowseButton> cmbMainFile;
-	private LabeledComponent<JComboBox> cmbModule;
-	private JPanel pnlMain;
+	public RustRunSettingsEditor()
+	{
 
-	private JComponent anchor;
+		myRootPanel = new JPanel(new VerticalFlowLayout(VerticalFlowLayout.TOP));
+		myRustParametersPanel = new RustParametersPanel();
+		myRootPanel.add(myRustParametersPanel);
 
-	private final ConfigurationModuleSelector moduleSelector;
-
-	public RustRunSettingsEditor(Project project) {
-		this.project = project;
-
-		moduleSelector = new ConfigurationModuleSelector(project, cmbModule.getComponent());
-		rustParametersPanel.setModuleContext(moduleSelector.getModule());
-		cmbModule.getComponent().addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				rustParametersPanel.setModuleContext(moduleSelector.getModule());
-			}
-		});
-
-		anchor = UIUtil.mergeComponentsWithAnchor(cmbMainFile, rustParametersPanel, cmbModule);
+		myModuleBox = new ComboBox();
+		myModuleBox.setRenderer(new ModuleListCellRenderer());
+		myRootPanel.add(LabeledComponent.left(myModuleBox, "Module: "));
 	}
 
 	@Override
-	protected void resetEditorFrom(RustConfiguration configuration) {
-		rustParametersPanel.reset(configuration);
-		moduleSelector.reset(configuration);
-		getMainFileField().setText(configuration.mainFile);
+	protected void resetEditorFrom(RustConfiguration configuration)
+	{
+		myRustParametersPanel.reset(configuration);
+
+		myModuleBox.removeAllItems();
+		for(Module module : configuration.getValidModules())
+		{
+			myModuleBox.addItem(module);
+		}
+		myModuleBox.setSelectedItem(configuration.getConfigurationModule().getModule());
 	}
 
 	@Override
-	protected void applyEditorTo(RustConfiguration configuration) throws ConfigurationException {
-		rustParametersPanel.applyTo(configuration);
-		moduleSelector.applyTo(configuration);
-		configuration.mainFile = getMainFileField().getText();
+	protected void applyEditorTo(RustConfiguration configuration) throws ConfigurationException
+	{
+		myRustParametersPanel.applyTo(configuration);
+		configuration.getConfigurationModule().setModule((Module) myModuleBox.getSelectedItem());
 	}
 
 	@NotNull
 	@Override
-	protected JComponent createEditor() {
-		return pnlMain;
-	}
-
-	@Override
-	protected void disposeEditor() {
-		super.disposeEditor();
-		pnlMain.setVisible(false);
-	}
-
-	@Override
-	public JComponent getAnchor() {
-		return anchor;
-	}
-
-	@Override
-	public void setAnchor(@Nullable JComponent anchor) {
-		this.anchor = anchor;
-		cmbMainFile.setAnchor(anchor);
-		cmbModule.setAnchor(anchor);
-		rustParametersPanel.setAnchor(anchor);
-	}
-
-	private void createUIComponents() {
-		cmbMainFile = new LabeledComponent<EditorTextFieldWithBrowseButton>();
-		cmbMainFile.setComponent(new EditorTextFieldWithBrowseButton(project, true, new JavaCodeFragment.VisibilityChecker() {
-			@Override
-			public Visibility isDeclarationVisible(PsiElement declaration, PsiElement place) {
-//				if (declaration instanceof PsiClass) {
-//					final PsiClass aClass = (PsiClass)declaration;
-//					if (ConfigurationUtil.MAIN_CLASS.value(aClass) && PsiMethodUtil.findMainMethod(aClass) != null) {
-//						return Visibility.VISIBLE;
-//					}
-//				}
-				return Visibility.VISIBLE;
-			}
-		}));
-	}
-
-	public EditorTextFieldWithBrowseButton getMainFileField() {
-		return cmbMainFile.getComponent();
+	protected JComponent createEditor()
+	{
+		return myRootPanel;
 	}
 }

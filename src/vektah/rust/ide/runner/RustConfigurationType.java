@@ -1,5 +1,8 @@
 package vektah.rust.ide.runner;
 
+import javax.swing.Icon;
+
+import org.jetbrains.annotations.NotNull;
 import com.intellij.execution.configuration.ConfigurationFactoryEx;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationType;
@@ -8,11 +11,8 @@ import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.openapi.extensions.Extensions;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.containers.ContainerUtil;
-import org.jetbrains.annotations.NotNull;
 import vektah.rust.RustIcons;
 import vektah.rust.i18n.RustBundle;
-
-import javax.swing.*;
 
 public class RustConfigurationType implements ConfigurationType {
 	public static final String ID = "RustRunConfiguration";
@@ -34,7 +34,7 @@ public class RustConfigurationType implements ConfigurationType {
 
 	@Override
 	public Icon getIcon() {
-		return RustIcons.ICON_RUST_16;
+		return RustIcons.Rust;
 	}
 
 	@NotNull

@@ -2,6 +2,7 @@ package vektah.rust.ide.runner;
 
 import org.jetbrains.annotations.NotNull;
 import org.mustbe.consulo.compiler.roots.CompilerPathsImpl;
+import org.mustbe.consulo.rust.module.extension.RustModuleExtension;
 import com.intellij.execution.CantRunException;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.CommandLineState;
@@ -10,58 +11,52 @@ import com.intellij.execution.configurations.SimpleProgramParameters;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.util.ProgramParametersUtil;
-import com.intellij.openapi.project.Project;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.util.SystemInfo;
-import vektah.rust.ide.sdk.RustSdkData;
-import vektah.rust.ide.sdk.RustSdkUtil;
 
-public class RustRunProfileState extends CommandLineState {
-	private final Project project;
-	private final RustConfiguration rustConfiguration;
-
-	protected RustRunProfileState(Project project, ExecutionEnvironment environment, RustConfiguration rustConfiguration) {
+public class RustRunProfileState extends CommandLineState
+{
+	protected RustRunProfileState(ExecutionEnvironment environment)
+	{
 		super(environment);
-
-		this.project = project;
-		this.rustConfiguration = rustConfiguration;
 	}
 
 	@NotNull
 	@Override
-	protected ProcessHandler startProcess() throws ExecutionException {
-		final Sdk sdk = RustSdkUtil.getSdk(project);
-		if ( sdk == null ) {
-			throw new CantRunException("No Rust sdk defined for this project");
+	protected ProcessHandler startProcess() throws ExecutionException
+	{
+		ExecutionEnvironment environment = getEnvironment();
+
+		RustConfiguration rustConfiguration = (RustConfiguration) environment.getRunProfile();
+
+		Module module = rustConfiguration.getConfigurationModule().getModule();
+		if(module == null)
+		{
+			throw new CantRunException("Not module");
 		}
 
-		final RustSdkData sdkData = (RustSdkData)sdk.getSdkAdditionalData();
-		if ( sdkData == null ) {
+		Sdk sdk = ModuleUtilCore.getSdk(module, RustModuleExtension.class);
+		if(sdk == null)
+		{
 			throw new CantRunException("No Rust sdk defined for this project");
-		}
-
-		String projectDir = project.getBasePath();
-
-		if (projectDir == null) {
-			throw new CantRunException("Could not retrieve the project directory");
 		}
 
 		final SimpleProgramParameters params = new SimpleProgramParameters();
 		ProgramParametersUtil.configureConfiguration(params, rustConfiguration);
 
-		String outputPath = CompilerPathsImpl.getModuleOutputPath(rustConfiguration.getModules()[0], false);
-		if (outputPath == null) {
+		String outputPath = CompilerPathsImpl.getModuleOutputPath(module, false);
+		if(outputPath == null)
+		{
 			throw new CantRunException("Could not retrieve the output directory");
 		}
 
 		// Build and run
-		String execName = outputPath.concat("/").concat(rustConfiguration.getName());
+		String execName = outputPath.concat("/").concat(module.getName());
 
-		if (execName.endsWith(".rs")) {
-			execName = execName.substring(0, execName.length() - 3);
-		}
-
-		if (SystemInfo.isWindows) {
+		if(SystemInfo.isWindows)
+		{
 			execName = execName.concat(".exe");
 		}
 
