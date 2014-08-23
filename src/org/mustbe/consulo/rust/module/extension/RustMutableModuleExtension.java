@@ -24,7 +24,7 @@ import org.consulo.module.extension.ui.ModuleExtensionWithSdkPanel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import com.intellij.openapi.projectRoots.Sdk;
-import com.intellij.openapi.roots.ModifiableRootModel;
+import com.intellij.openapi.roots.ModuleRootLayer;
 
 /**
  * @author VISTALL
@@ -32,7 +32,7 @@ import com.intellij.openapi.roots.ModifiableRootModel;
  */
 public class RustMutableModuleExtension extends RustModuleExtension implements MutableModuleExtensionWithSdk<RustModuleExtension>
 {
-	public RustMutableModuleExtension(@NotNull String id, @NotNull ModifiableRootModel rootModel)
+	public RustMutableModuleExtension(@NotNull String id, @NotNull ModuleRootLayer rootModel)
 	{
 		super(id, rootModel);
 	}

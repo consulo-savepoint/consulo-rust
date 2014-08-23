@@ -19,7 +19,7 @@ package org.mustbe.consulo.rust.module.extension;
 import org.consulo.module.extension.impl.ModuleExtensionWithSdkImpl;
 import org.jetbrains.annotations.NotNull;
 import com.intellij.openapi.projectRoots.SdkType;
-import com.intellij.openapi.roots.ModifiableRootModel;
+import com.intellij.openapi.roots.ModuleRootLayer;
 import vektah.rust.ide.sdk.RustSdkType;
 
 /**
@@ -28,7 +28,7 @@ import vektah.rust.ide.sdk.RustSdkType;
  */
 public class RustModuleExtension extends ModuleExtensionWithSdkImpl<RustModuleExtension>
 {
-	public RustModuleExtension(@NotNull String id, @NotNull ModifiableRootModel rootModel)
+	public RustModuleExtension(@NotNull String id, @NotNull ModuleRootLayer rootModel)
 	{
 		super(id, rootModel);
 	}
