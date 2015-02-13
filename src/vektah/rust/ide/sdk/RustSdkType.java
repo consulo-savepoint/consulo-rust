@@ -34,13 +34,6 @@ public class RustSdkType extends SdkType
 
 	@Nullable
 	@Override
-	public String suggestHomePath()
-	{
-		return null;
-	}
-
-	@Nullable
-	@Override
 	public String getVersionString(String s)
 	{
 		return RustSdkUtil.getVersion(new File(getRustc(s)));
